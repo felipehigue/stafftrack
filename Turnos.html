@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StaffTrack - Programación de Turnos</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      display: flex;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    /* Barra de navegación lateral */
+    .sidebar {
+      width: 250px;
+      background-color: #000;
+      color: white;
+      height: 100vh;
+      position: fixed;
+      padding: 20px 0;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo-container {
+      text-align: center;
+      padding: 20px 0 30px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      border: 1px solid white;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 5px;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: #ccc;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background-color: #333;
+      color: white;
+      border-left: 3px solid white;
+    }
+    
+    .nav-link i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    
+    /* Contenido principal */
+    .main-content {
+      margin-left: 250px;
+      flex: 1;
+      padding: 30px;
+      background-color: #fff;
+      min-height: 100vh;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #000;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 15px;
+      cursor: pointer;
+    }
+    
+    /* Controles de calendario */
+    .calendar-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .month-navigation {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .nav-button {
+      background-color: #000;
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .current-month {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .view-options {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .view-button {
+      padding: 8px 15px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .view-button.active {
+      background-color: #000;
+      color: white;
+      border-color: #000;
+    }
+    
+    /* Calendario de turnos */
+    .shift-calendar {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    
+    .shift-calendar th {
+      text-align: center;
+      padding: 12px;
+      background-color: #f9f9f9;
+      border-bottom: 2px solid #eee;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .shift-calendar td {
+      height: 100px;
+      padding: 5px;
+      border: 1px solid #eee;
+      vertical-align: top;
+    }
+    
+    .day-number {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .other-month {
+      background-color: #fafafa;
+      color: #999;
+    }
+    
+    .today {
+      background-color: #f0f0f0;
+    }
+    
+    /* Tarjetas de turno */
+    .shift-card {
+      background-color: #f8f9fa;
+      border-left: 3px solid #000;
+      border-radius: 3px;
+      padding: 5px;
+      margin-bottom: 5px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    
+    .shift-card.morning {
+      border-left-color: #4e73df;
+    }
+    
+    .shift-card.afternoon {
+      border-left-color: #1cc88a;
+    }
+    
+    .shift-card.night {
+      border-left-color: #36b9cc;
+    }
+    
+    .shift-card .employee {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    
+    .shift-card .time {
+      color: #666;
+      font-size: 11px;
+    }
+    
+    /* Formulario de turnos */
+    .shift-form {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px;
+      background-color: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+    
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #777;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .form-row .form-group {
+      flex: 1;
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    /* Botones de acción */
+    .action-btn {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .primary-btn {
+      background-color: #000;
+      color: white;
+    }
+    
+    .primary-btn:hover {
+      background-color: #333;
+    }
+    
+    .secondary-btn {
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      color: #333;
+    }
+    
+    .secondary-btn:hover {
+      background-color: #e9ecef;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+        overflow: hidden;
+      }
+      
+      .logo span, .nav-link span {
+        display: none;
+      }
+      
+      .logo-icon {
+        margin-right: 0;
+      }
+      
+      .nav-link {
+        justify-content: center;
+        padding: 12px 0;
+      }
+      
+      .nav-link i {
+        margin-right: 0;
+        font-size: 20px;
+      }
+      
+      .main-content {
+        margin-left: 70px;
+        padding: 15px;
+      }
+      
+      .calendar-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      
+      .shift-calendar {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .shift-form {
+        width: 90%;
+      }
+    }
+  </style>
+  <!-- Iconos (usando Font Awesome) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <!-- Barra lateral de navegación -->
+  <nav class="sidebar">
+    <div class="logo-container">
+      <a href="#" class="logo">
+        <div class="logo-icon">ST</div>
+        <span>StaffTrack</span>
+      </a>
+    </div>
+    
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="fas fa-users"></i>
+          <span>Gestión de Personal</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="fas fa-user-tag"></i>
+          <span>Asignación de Roles</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link active">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Programación de Turnos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="fas fa-calendar-times"></i>
+          <span>Registro de Ausencias</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="fas fa-tasks"></i>
+          <span>Panel de Tareas</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  
+  <!-- Contenido principal -->
+  <main class="main-content">
+    <header class="header">
+      <h1 class="page-title">Programación de Turnos</h1>
+      <div class="user-profile">
+        <span>Bienvenido, Admin</span>
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Controles del calendario -->
+    <div class="calendar-controls">
+      <div class="month-navigation">
+        <button class="nav-button"><i class="fas fa-chevron-left"></i></button>
+        <span class="current-month">Marzo 2023</span>
+        <button class="nav-button"><i class="fas fa-chevron-right"></i></button>
+        <button class="action-btn primary-btn" id="addShiftBtn">
+          <i class="fas fa-plus"></i> Nuevo Turno
+        </button>
+      </div>
+      <div class="view-options">
+        <button class="view-button">Día</button>
+        <button class="view-button">Semana</button>
+        <button class="view-button active">Mes</button>
+      </div>
+    </div>
+    
+    <!-- Calendario de turnos -->
+    <table class="shift-calendar">
+      <thead>
+        <tr>
+          <th>Lunes</th>
+          <th>Martes</th>
+          <th>Miércoles</th>
+          <th>Jueves</th>
+          <th>Viernes</th>
+          <th>Sábado</th>
+          <th>Domingo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="other-month">
+            <div class="day-number">27</div>
+          </td>
+          <td class="other-month">
+            <div class="day-number">28</div>
+          </td>
+          <td>
+            <div class="day-number">1</div>
+            <div class="shift-card morning">
+              <div class="employee">María González</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+            <div class="shift-card afternoon">
+              <div class="employee">Carlos Mendoza</div>
+              <div class="time">16:00 - 00:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">2</div>
+            <div class="shift-card morning">
+              <div class="employee">Ana Rodríguez</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">3</div>
+            <div class="shift-card night">
+              <div class="employee">Luis Pérez</div>
+              <div class="time">00:00 - 08:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">4</div>
+          </td>
+          <td>
+            <div class="day-number">5</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="day-number">6</div>
+            <div class="shift-card morning">
+              <div class="employee">María González</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">7</div>
+            <div class="shift-card afternoon">
+              <div class="employee">Carlos Mendoza</div>
+              <div class="time">16:00 - 00:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">8</div>
+          </td>
+          <td>
+            <div class="day-number">9</div>
+            <div class="shift-card morning">
+              <div class="employee">Ana Rodríguez</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+            <div class="shift-card night">
+              <div class="employee">Luis Pérez</div>
+              <div class="time">00:00 - 08:00</div>
+            </div>
+          </td>
+          <td class="today">
+            <div class="day-number">10</div>
+            <div class="shift-card morning">
+              <div class="employee">María González</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+            <div class="shift-card afternoon">
+              <div class="employee">Carlos Mendoza</div>
+              <div class="time">16:00 - 00:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">11</div>
+          </td>
+          <td>
+            <div class="day-number">12</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="day-number">13</div>
+            <div class="shift-card morning">
+              <div class="employee">Ana Rodríguez</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">14</div>
+            <div class="shift-card afternoon">
+              <div class="employee">Carlos Mendoza</div>
+              <div class="time">16:00 - 00:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">15</div>
+          </td>
+          <td>
+            <div class="day-number">16</div>
+            <div class="shift-card morning">
+              <div class="employee">María González</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+            <div class="shift-card night">
+              <div class="employee">Luis Pérez</div>
+              <div class="time">00:00 - 08:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">17</div>
+          </td>
+          <td>
+            <div class="day-number">18</div>
+          </td>
+          <td>
+            <div class="day-number">19</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="day-number">20</div>
+            <div class="shift-card morning">
+              <div class="employee">Ana Rodríguez</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">21</div>
+            <div class="shift-card afternoon">
+              <div class="employee">Carlos Mendoza</div>
+              <div class="time">16:00 - 00:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">22</div>
+          </td>
+          <td>
+            <div class="day-number">23</div>
+            <div class="shift-card morning">
+              <div class="employee">María González</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+            <div class="shift-card night">
+              <div class="employee">Luis Pérez</div>
+              <div class="time">00:00 - 08:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">24</div>
+          </td>
+          <td>
+            <div class="day-number">25</div>
+          </td>
+          <td>
+            <div class="day-number">26</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="day-number">27</div>
+            <div class="shift-card morning">
+              <div class="employee">Ana Rodríguez</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">28</div>
+            <div class="shift-card afternoon">
+              <div class="employee">Carlos Mendoza</div>
+              <div class="time">16:00 - 00:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">29</div>
+          </td>
+          <td>
+            <div class="day-number">30</div>
+            <div class="shift-card morning">
+              <div class="employee">María González</div>
+              <div class="time">08:00 - 16:00</div>
+            </div>
+            <div class="shift-card night">
+              <div class="employee">Luis Pérez</div>
+              <div class="time">00:00 - 08:00</div>
+            </div>
+          </td>
+          <td>
+            <div class="day-number">31</div>
+          </td>
+          <td class="other-month">
+            <div class="day-number">1</div>
+          </td>
+          <td class="other-month">
+            <div class="day-number">2</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <!-- Formulario de turnos -->
+    <div class="shift-form" id="shiftForm">
+      <div class="form-header">
+        <h3>Programar Nuevo Turno</h3>
+        <button class="close-btn">&times;</button>
+      </div>
+      <form>
+        <div class="form-group">
+          <label for="shiftEmployee">Empleado</label>
+          <select id="shiftEmployee" required>
+            <option value="">Seleccionar empleado</option>
+            <option>María González</option>
+            <option>Carlos Mendoza</option>
+            <option>Ana Rodríguez</option>
+            <option>Luis Pérez</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="shiftDate">Fecha</label>
+            <input type="date" id="shiftDate" required>
+          </div>
+          <div class="form-group">
+            <label for="shiftType">Tipo de Turno</label>
+            <select id="shiftType" required>
+              <option>Mañana (08:00 - 16:00)</option>
+              <option>Tarde (16:00 - 00:00)</option>
+              <option>Noche (00:00 - 08:00)</option>
+              <option>Personalizado</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" id="customTime" style="display: none;">
+          <div class="form-group">
+            <label for="startTime">Hora de Inicio</label>
+            <input type="time" id="startTime">
+          </div>
+          <div class="form-group">
+            <label for="endTime">Hora de Fin</label>
+            <input type="time" id="endTime">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="shiftNotes">Notas (Opcional)</label>
+          <textarea id="shiftNotes" rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="action-btn secondary-btn">Cancelar</button>
+          <button type="submit" class="action-btn primary-btn">Guardar Turno</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    // Script para mostrar/ocultar el formulario de turnos
+    document.addEventListener('DOMContentLoaded', function() {
+      const addShiftBtn = document.getElementById('addShiftBtn');
+      const shiftForm = document.getElementById('shiftForm');
+      const closeBtn = document.querySelector('.close-btn');
+      const shiftType = document.getElementById('shiftType');
+      const customTime = document.getElementById('customTime');
+      
+      addShiftBtn.addEventListener('click', function() {
+        shiftForm.style.display = 'block';
+      });
+      
+      closeBtn.addEventListener('click', function() {
+        shiftForm.style.display = 'none';
+      });
+      
+      // Mostrar campos de hora personalizada cuando se selecciona "Personalizado"
+      shiftType.addEventListener('change', function() {
+        if (this.value === 'Personalizado') {
+          customTime.style.display = 'flex';
+        } else {
+          customTime.style.display = 'none';
+        }
+      });
+      
+      // Cerrar formulario al hacer clic fuera de él
+      window.addEventListener('click', function(event) {
+        if (event.target === shiftForm) {
+          shiftForm.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
