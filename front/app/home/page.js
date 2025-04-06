@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import UserIconButton from "../components/icon";
 
 export default function Home() {
@@ -16,12 +17,12 @@ export default function Home() {
   };
 
   const navItems = [
-    { icon: "tachometer-alt", text: "Dashboard", id: "dashboard" },
-    { icon: "users", text: "Gestión de Personal", id: "staff" },
-    { icon: "user-tag", text: "Asignación de Roles", id: "roles" },
-    { icon: "calendar-alt", text: "Programación de Turnos", id: "shifts" },
-    { icon: "calendar-times", text: "Registro de Ausencias", id: "absences" },
-    { icon: "tasks", text: "Panel de Tareas", id: "tasks" },
+    { icon: "tachometer-alt", text: "Dashboard", id: "dashboard", path: "/home" },
+    { icon: "users", text: "Gestión de Personal", id: "staff", path: "/gestionpersonal" },
+    { icon: "user-tag", text: "Asignación de Roles", id: "roles", path: "#" },
+    { icon: "calendar-alt", text: "Programación de Turnos", id: "shifts", path: "#" },
+    { icon: "calendar-times", text: "Registro de Ausencias", id: "absences", path: "#" },
+    { icon: "tasks", text: "Panel de Tareas", id: "tasks", path: "#" },
   ];
 
   const summaryCards = [
@@ -46,7 +47,6 @@ export default function Home() {
         >
           <div className="p-5 border-b border-gray-700 flex items-center justify-between">
             <a href="#" className="flex items-center">
-              {/* Asegura que ST sea visible */}
               <div className="w-10 h-10 flex items-center justify-center text-white font-bold bg-gray-800 rounded-full border border-white">
                 ST
               </div>
@@ -57,7 +57,6 @@ export default function Home() {
               )}
             </a>
 
-            {/* Botón para ocultar sidebar */}
             <button
               onClick={toggleSidebar}
               className="text-gray-300 hover:text-white focus:outline-none ml-3"
@@ -73,8 +72,8 @@ export default function Home() {
             <ul>
               {navItems.map((item) => (
                 <li key={item.id} className="mb-1">
-                  <a
-                    href="#"
+                  <Link
+                    href={item.path}
                     className={`flex items-center p-3 transition-colors ${
                       sidebarOpen ? "px-5" : "justify-center"
                     } text-gray-300 hover:bg-gray-800 hover:text-white ${
@@ -86,7 +85,7 @@ export default function Home() {
                   >
                     <i className={`fas fa-${item.icon} text-lg ${sidebarOpen ? "mr-3" : ""}`} />
                     {sidebarOpen && <span>{item.text}</span>}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -96,7 +95,6 @@ export default function Home() {
         {/* Main Content */}
         <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
           <div className="p-8">
-            {/* Header */}
             <header className="flex justify-between items-center mb-8 pb-5 border-b border-gray-200">
               <h1 className="text-2xl font-semibold">Dashboard</h1>
               <div className="flex items-center space-x-4">
@@ -107,7 +105,6 @@ export default function Home() {
               </div>
             </header>
 
-            {/* Summary Cards */}
             <section className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
               {summaryCards.map((card, index) => (
                 <div key={index} className="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
@@ -117,7 +114,6 @@ export default function Home() {
               ))}
             </section>
 
-            {/* Main Content Section */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               <div className="lg:col-span-2">
                 <h2 className="text-lg mb-4 pb-2 border-b border-gray-200">

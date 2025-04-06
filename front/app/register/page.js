@@ -1,16 +1,20 @@
 "use client";
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
-
   const [passwordError, setPasswordError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const router = useRouter();
 
   async function handleSubmit(event) {
     event.preventDefault();
     setPasswordError('');
-  
-    // Prepara los datos para Django
+    setFormErrors({});
+    setIsSubmitting(true);
+
     const formData = {
       firstname: event.target.firstname.value,
       lastname: event.target.lastname.value,
@@ -19,15 +23,16 @@ export default function RegisterPage() {
       department: event.target.department.value,
       password1: event.target.password.value,
       password2: event.target['confirm-password'].value,
-      // Django necesita username, lo generamos del email
       username: event.target.email.value.split('@')[0]
     };
-  
+
+    // Validación de contraseña
     if (formData.password1 !== formData.password2) {
       setPasswordError('Las contraseñas no coinciden.');
+      setIsSubmitting(false);
       return;
     }
-  
+
     try {
       const response = await fetch('http://127.0.0.1:8000/api/registro/', {
         method: 'POST',
@@ -36,27 +41,24 @@ export default function RegisterPage() {
         },
         body: JSON.stringify(formData),
       });
-  
+
       const responseData = await response.json();
       
       if (!response.ok) {
-        // Muestra errores específicos
         if (responseData.errors) {
-          Object.entries(responseData.errors).forEach(([field, errors]) => {
-            console.error(`Error en ${field}:`, errors);
-            // Aquí puedes setear estados de error para mostrarlos en la UI
-          });
+          setFormErrors(responseData.errors);
         }
+        setIsSubmitting(false);
         return;
       }
-  
-      // Registro exitoso - redirigir o mostrar mensaje
-      console.log('Registro exitoso:', responseData);
-      // router.push('/dashboard'); // Ejemplo de redirección
+
+      // Redirección después de registro exitoso
+      router.push('/');
       
     } catch (error) {
       console.error('Error de conexión:', error);
-      // Mostrar error genérico al usuario
+      setFormErrors({ general: ['Error al conectar con el servidor'] });
+      setIsSubmitting(false);
     }
   }
 
@@ -74,6 +76,21 @@ export default function RegisterPage() {
 
       <div className="w-1/2 bg-white p-8 md:p-10 lg:p-12 xl:p-16 flex flex-col justify-center">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">Crear Cuenta</h2>
+        
+        {/* Mostrar errores generales */}
+        {formErrors.general && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
+            {formErrors.general.join(', ')}
+          </div>
+        )}
+
+        {/* Mostrar error de contraseña */}
+        {passwordError && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
+            {passwordError}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="md:flex md:gap-4 mb-4">
             <div className="mb-4 md:mb-0 md:w-1/2">
@@ -83,11 +100,16 @@ export default function RegisterPage() {
               <input
                 type="text"
                 id="firstname"
-                name='firstname'
+                name="firstname"
                 placeholder="Ingrese su nombre"
                 required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100 ${
+                  formErrors.firstname ? 'border-red-500' : ''
+                }`}
               />
+              {formErrors.firstname && (
+                <p className="text-red-500 text-xs italic mt-1">{formErrors.firstname.join(', ')}</p>
+              )}
             </div>
             <div className="md:w-1/2">
               <label htmlFor="lastname" className="block text-gray-700 text-sm font-bold mb-2">
@@ -99,8 +121,13 @@ export default function RegisterPage() {
                 name="lastname"
                 placeholder="Ingrese su apellido"
                 required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100 ${
+                  formErrors.lastname ? 'border-red-500' : ''
+                }`}
               />
+              {formErrors.lastname && (
+                <p className="text-red-500 text-xs italic mt-1">{formErrors.lastname.join(', ')}</p>
+              )}
             </div>
           </div>
 
@@ -114,8 +141,13 @@ export default function RegisterPage() {
               name="email"
               placeholder="Ingrese su correo electrónico"
               required
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100"
+              className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100 ${
+                formErrors.email ? 'border-red-500' : ''
+              }`}
             />
+            {formErrors.email && (
+              <p className="text-red-500 text-xs italic mt-1">{formErrors.email.join(', ')}</p>
+            )}
           </div>
 
           <div className="md:flex md:gap-4 mb-4">
@@ -126,11 +158,16 @@ export default function RegisterPage() {
               <input
                 type="text"
                 id="position"
-                name='position'
+                name="position"
                 placeholder="Ej: Gerente, Analista"
                 required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100 ${
+                  formErrors.position ? 'border-red-500' : ''
+                }`}
               />
+              {formErrors.position && (
+                <p className="text-red-500 text-xs italic mt-1">{formErrors.position.join(', ')}</p>
+              )}
             </div>
             <div className="md:w-1/2">
               <label htmlFor="department" className="block text-gray-700 text-sm font-bold mb-2">
@@ -141,9 +178,11 @@ export default function RegisterPage() {
                 name="department"
                 defaultValue=""
                 required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100 ${
+                  formErrors.department ? 'border-red-500' : ''
+                }`}
               >
-                <option value="" disabled  >
+                <option value="" disabled>
                   Seleccione su área
                 </option>
                 <option value="rh">Recursos Humanos</option>
@@ -153,6 +192,9 @@ export default function RegisterPage() {
                 <option value="operations">Operaciones</option>
                 <option value="other">Otro</option>
               </select>
+              {formErrors.department && (
+                <p className="text-red-500 text-xs italic mt-1">{formErrors.department.join(', ')}</p>
+              )}
             </div>
           </div>
 
@@ -164,11 +206,16 @@ export default function RegisterPage() {
               <input
                 type="password"
                 id="password"
-                name='password'
+                name="password"
                 placeholder="Cree una contraseña"
                 required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100 ${
+                  formErrors.password1 ? 'border-red-500' : ''
+                }`}
               />
+              {formErrors.password1 && (
+                <p className="text-red-500 text-xs italic mt-1">{formErrors.password1.join(', ')}</p>
+              )}
             </div>
             <div className="md:w-1/2">
               <label htmlFor="confirm-password" className="block text-gray-700 text-sm font-bold mb-2">
@@ -177,7 +224,7 @@ export default function RegisterPage() {
               <input
                 type="password"
                 id="confirm-password"
-                name='confirm-password'
+                name="confirm-password"
                 placeholder="Repita su contraseña"
                 required
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-black bg-gray-100"
@@ -187,16 +234,19 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline w-full mt-4"
+            disabled={isSubmitting}
+            className={`bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline w-full mt-4 ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
-            Registrarse
+            {isSubmitting ? 'Registrando...' : 'Registrarse'}
           </button>
         </form>
 
         <p className="text-center text-gray-600 text-sm mt-6">
           ¿Ya tiene una cuenta?{' '}
-          <Link href="/" className="**text-black hover:underline**">
-            **Iniciar Sesión**
+          <Link href="/" className="text-black hover:underline">
+            Iniciar Sesión
           </Link>
         </p>
 
