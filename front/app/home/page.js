@@ -15,7 +15,7 @@ export default function Dashboard() {
   useEffect(() => {
     const cargarTareas = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/tareas/'); // Reemplaza con la URL correcta de tu API de tareas
+        const res = await fetch('http://127.0.0.1:8000/api/tareas/'); 
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
@@ -30,7 +30,7 @@ export default function Dashboard() {
 
     const cargarTurnos = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/turnos/'); // Reemplaza con la URL correcta de tu API de turnos
+        const res = await fetch('http://127.0.0.1:8000/api/turnos/'); 
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
