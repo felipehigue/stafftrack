@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'usuario',
     'gestionpersonal',
     'programacion',
+    'tareas',
     'corsheaders'
 ]
 

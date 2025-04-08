@@ -52,6 +52,7 @@ export default function Gestionpersonal() {
   const fetchDepartamentos = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/departamentos/');
+      
       const data = await response.json();
       setDepartamentos(data);
     } catch (error) {
@@ -218,7 +219,15 @@ export default function Gestionpersonal() {
                   </td>
                   <td className="px-4 py-3">{empleado.codigo_empleado}</td>
                   <td className="px-4 py-3">{empleado.cargo?.nombre || 'No asignado'}</td>
-                  <td className="px-4 py-3">{empleado.cargo?.departamento?.nombre || 'No asignado'}</td>
+                  <td className="px-4 py-3">
+  {(() => {
+    if (empleado.cargo) {
+      const departamento = departamentos.find(d => d.id === empleado.cargo.departamento);
+      return departamento ? departamento.nombre : 'No asignado';
+    }
+    return 'No asignado';
+  })()}
+</td>
                   <td className="px-4 py-3">
                     <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
                       empleado.estado === 'ACTIVO' ? 'bg-green-100 text-green-800' :
@@ -301,22 +310,22 @@ export default function Gestionpersonal() {
                   <div className="flex-1">
                     <label className="block mb-1 font-medium">Área</label>
                     <select
-                      className="w-full border border-gray-300 px-3 py-2 rounded"
-                      value={formData.departamento_id}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData, 
-                          departamento_id: e.target.value
-                        });
-                      }}
-                    >
-                      <option value="">Seleccionar área (opcional)</option>
-                      {departamentos.map((departamento) => (
-                        <option key={departamento.id} value={departamento.id}>
-                          {departamento.nombre}
-                        </option>
-                      ))}
-                    </select>
+  className="w-full border border-gray-300 px-3 py-2 rounded"
+  value={formData.departamento_id}
+  onChange={(e) => {
+    setFormData({
+      ...formData,
+      departamento_id: e.target.value
+    });
+  }}
+>
+  <option value="">Seleccione un departamento</option>
+  {departamentos.map((dep) => (
+    <option key={dep.id} value={dep.id}>
+      {dep.nombre}
+    </option>
+  ))}
+</select>
                   </div>
                   <div className="flex-1">
                     <label className="block mb-1 font-medium">Cargo*</label>
@@ -327,11 +336,15 @@ export default function Gestionpersonal() {
                       required
                     >
                       <option value="">Seleccionar cargo</option>
-                      {cargos.map((cargo) => (
-                        <option key={cargo.id} value={cargo.id}>
-                          {cargo.nombre} {cargo.departamento ? `(${cargo.departamento.nombre})` : ''}
-                        </option>
-                      ))}
+                      {cargos.map((cargo) => {
+                        // Find the matching department object using the departamento ID
+                        const departamento = departamentos.find(d => d.id === cargo.departamento);
+                        return (
+                          <option key={cargo.id} value={cargo.id}>
+                            {cargo.nombre} {departamento ? `(${departamento.nombre})` : ''}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 </div>
@@ -407,7 +420,15 @@ export default function Gestionpersonal() {
                   <div>
                     <h4 className="font-medium text-gray-500">Información Laboral</h4>
                     <p>Cargo: {selectedEmpleado.cargo?.nombre || 'No asignado'}</p>
-                    <p>Área: {selectedEmpleado.cargo?.departamento?.nombre || 'No asignado'}</p>
+                    <p>Área: {
+  (() => {
+    if (selectedEmpleado.cargo?.departamento) {
+      const departamento = departamentos.find(d => d.id === selectedEmpleado.cargo.departamento);
+      return departamento ? departamento.nombre : 'No asignado';
+    }
+    return 'No asignado';
+  })()
+}</p>
                     <p>Estado: 
                       <span className={`inline-block ml-2 px-2 py-1 rounded text-xs font-medium ${
                         selectedEmpleado.estado === 'ACTIVO' ? 'bg-green-100 text-green-800' :
