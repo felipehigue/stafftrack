@@ -1,135 +1,147 @@
-"use client";
-import React, { useState } from "react";
-import Head from "next/head";
-import Link from "next/link";
-import UserIconButton from "../components/icon";
+'use client'
+import Head from 'next/head';
+import Sidebar from '../components/Sidebar';
+import { useState, useEffect } from 'react';
+import { FaTasks, FaClock, FaTachometerAlt, FaUsers, FaUserTag } from 'react-icons/fa'; // Importa los iconos de los cuadros
 
-export default function Home() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeNav, setActiveNav] = useState("dashboard");
+export default function Dashboard() {
+  const [tareas, setTareas] = useState([]);
+  const [turnos, setTurnos] = useState([]);
+  const [errorTareas, setErrorTareas] = useState(null);
+  const [errorTurnos, setErrorTurnos] = useState(null);
+  const [loadingTareas, setLoadingTareas] = useState(true);
+  const [loadingTurnos, setLoadingTurnos] = useState(true);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  useEffect(() => {
+    const cargarTareas = async () => {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/tareas/'); // Reemplaza con la URL correcta de tu API de tareas
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        setTareas(data);
+        setLoadingTareas(false);
+      } catch (error) {
+        setErrorTareas(error.message);
+        setLoadingTareas(false);
+      }
+    };
 
-  const handleNavClick = (navItem) => {
-    setActiveNav(navItem);
-  };
+    const cargarTurnos = async () => {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/turnos/'); // Reemplaza con la URL correcta de tu API de turnos
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        setTurnos(data);
+        setLoadingTurnos(false);
+      } catch (error) {
+        setErrorTurnos(error.message);
+        setLoadingTurnos(false);
+      }
+    };
 
-  const navItems = [
-    { icon: "tachometer-alt", text: "Dashboard", id: "dashboard", path: "/home" },
-    { icon: "users", text: "Gestión de Personal", id: "staff", path: "/gestionpersonal" },
-    { icon: "user-tag", text: "Asignación de Roles", id: "roles", path: "#" },
-    { icon: "calendar-alt", text: "Programación de Turnos", id: "shifts", path: "#" },
-    { icon: "calendar-times", text: "Registro de Ausencias", id: "absences", path: "#" },
-    { icon: "tasks", text: "Panel de Tareas", id: "tasks", path: "#" },
-  ];
-
-  const summaryCards = [
-    { title: "Personal Activo", value: "142" },
-    { title: "Ausencias Hoy", value: "8" },
-    { title: "Tareas Pendientes", value: "23" },
-  ];
+    cargarTareas();
+    cargarTurnos();
+  }, []);
 
   return (
     <>
       <Head>
         <title>StaffTrack - Dashboard</title>
-        <meta name="description" content="Panel de control de StaffTrack" />
       </Head>
-
-      <div className="flex bg-gray-100 min-h-screen">
-        {/* Sidebar */}
-        <aside
-          className={`bg-black text-white fixed h-screen transition-all duration-300 z-50 ${
-            sidebarOpen ? "w-64" : "w-20"
-          }`}
-        >
-          <div className="p-5 border-b border-gray-700 flex items-center justify-between">
-            <a href="#" className="flex items-center">
-              <div className="w-10 h-10 flex items-center justify-center text-white font-bold bg-gray-800 rounded-full border border-white">
-                ST
+      <div className="flex min-h-screen bg-gray-100 text-gray-800">
+        <Sidebar />
+        <main className="ml-64 flex-1 p-8 bg-white min-h-screen">
+          <header className="flex justify-between items-center mb-8 border-b pb-5">
+            <h1 className="text-2xl font-semibold">Dashboard</h1>
+            <div className="flex items-center">
+              <span>Bienvenido, Admin</span>
+              <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center ml-4 cursor-pointer">
+                {/* <FaUser /> */}
               </div>
-              {sidebarOpen && (
-                <span className="font-bold ml-3 transition-opacity duration-300">
-                  StaffTrack
-                </span>
-              )}
-            </a>
+            </div>
+          </header>
 
-            <button
-              onClick={toggleSidebar}
-              className="text-gray-300 hover:text-white focus:outline-none ml-3"
-              aria-label={sidebarOpen ? "Ocultar menú" : "Mostrar menú"}
-            >
-              <i
-                className={`fas fa-chevron-${sidebarOpen ? "left" : "right"} text-lg`}
-              ></i>
-            </button>
+          {/* Cuadros Informativos Estáticos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div className="bg-white shadow rounded-md p-4 flex items-center justify-between">
+              <div>
+                <div className="text-3xl font-bold text-blue-500">15</div>
+                <div className="text-gray-600">Tareas Pendientes</div>
+              </div>
+              <FaTachometerAlt className="text-4xl text-blue-300" />
+            </div>
+            <div className="bg-white shadow rounded-md p-4 flex items-center justify-between">
+              <div>
+                <div className="text-3xl font-bold text-yellow-500">8</div>
+                <div className="text-gray-600">En Progreso</div>
+              </div>
+              <FaTasks className="text-4xl text-yellow-300" />
+            </div>
+            <div className="bg-white shadow rounded-md p-4 flex items-center justify-between">
+              <div>
+                <div className="text-3xl font-bold text-green-500">22</div>
+                <div className="text-gray-600">Completadas</div>
+              </div>
+              <FaUsers className="text-4xl text-green-300" />
+            </div>
+            <div className="bg-white shadow rounded-md p-4 flex items-center justify-between">
+              <div>
+                <div className="text-3xl font-bold text-purple-500">45</div>
+                <div className="text-gray-600">Empleados Activos</div>
+              </div>
+              <FaUserTag className="text-4xl text-purple-300" />
+            </div>
           </div>
 
-          <nav className="mt-5">
-            <ul>
-              {navItems.map((item) => (
-                <li key={item.id} className="mb-1">
-                  <Link
-                    href={item.path}
-                    className={`flex items-center p-3 transition-colors ${
-                      sidebarOpen ? "px-5" : "justify-center"
-                    } text-gray-300 hover:bg-gray-800 hover:text-white ${
-                      activeNav === item.id
-                        ? "bg-gray-800 text-white border-l-4 border-white"
-                        : ""
-                    }`}
-                    onClick={() => handleNavClick(item.id)}
-                  >
-                    <i className={`fas fa-${item.icon} text-lg ${sidebarOpen ? "mr-3" : ""}`} />
-                    {sidebarOpen && <span>{item.text}</span>}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </aside>
+          {/* Sección de Tareas Dinámicas */}
+          <div className="bg-white shadow rounded-md p-4 mb-6">
+            <div className="flex items-center mb-4">
+              <FaTasks className="text-xl mr-2 text-blue-500" />
+              <h2 className="text-lg font-semibold">Tareas Asignadas Recientes</h2>
+            </div>
+            {loadingTareas && <p>Cargando tareas...</p>}
+            {errorTareas && <p className="text-red-500">Error al cargar tareas: {errorTareas}</p>}
+            {!loadingTareas && !errorTareas && tareas.length === 0 && <p>No hay tareas asignadas.</p>}
+            {!loadingTareas && !errorTareas && tareas.length > 0 && (
+              <ul>
+                {tareas.map((tarea) => (
+                  <li key={tarea.id} className="py-2 border-b last:border-b-0">
+                    <strong className="block">{tarea.titulo}</strong>
+                    <span className="text-sm text-gray-600">Asignado a: {tarea.empleado ? tarea.empleado.nombre : 'Sin asignar'}</span>
+                    {tarea.fecha_vencimiento && (
+                      <span className="text-sm text-gray-600 ml-2">Vence: {new Date(tarea.fecha_vencimiento).toLocaleDateString()}</span>
+                    )}
+                    <span className={`inline-block ml-2 px-2 py-1 text-xs font-medium rounded ${tarea.estado === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-900' : tarea.estado === 'EN_PROGRESO' ? 'bg-blue-100 text-blue-900' : 'bg-green-100 text-green-900'}`}>{tarea.estado}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-        {/* Main Content */}
-        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
-          <div className="p-8">
-            <header className="flex justify-between items-center mb-8 pb-5 border-b border-gray-200">
-              <h1 className="text-2xl font-semibold">Dashboard</h1>
-              <div className="flex items-center space-x-4">
-                <span>Bienvenido, Admin</span>
-                <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center cursor-pointer">
-                  <UserIconButton />
-                </div>
-              </div>
-            </header>
-
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-              {summaryCards.map((card, index) => (
-                <div key={index} className="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
-                  <h3 className="text-sm text-gray-500 mb-2">{card.title}</h3>
-                  <p className="text-3xl font-semibold">{card.value}</p>
-                </div>
-              ))}
-            </section>
-
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <div className="lg:col-span-2">
-                <h2 className="text-lg mb-4 pb-2 border-b border-gray-200">
-                  Últimas Actividades
-                </h2>
-                <div className="bg-white rounded-lg shadow-sm p-5 border border-gray-200 h-80 flex items-center justify-center">
-                  <p className="text-gray-500">Gráfico o lista de actividades recientes</p>
-                </div>
-              </div>
-              <div>
-                <h2 className="text-lg mb-4 pb-2 border-b border-gray-200">Turnos Hoy</h2>
-                <div className="bg-white rounded-lg shadow-sm p-5 border border-gray-200 h-80 flex items-center justify-center">
-                  <p className="text-gray-500">Lista de turnos programados para hoy</p>
-                </div>
-              </div>
-            </section>
+          {/* Sección de Turnos Dinámicos */}
+          <div className="bg-white shadow rounded-md p-4">
+            <div className="flex items-center mb-4">
+              <FaClock className="text-xl mr-2 text-green-500" />
+              <h2 className="text-lg font-semibold">Turnos de Hoy</h2>
+            </div>
+            {loadingTurnos && <p>Cargando turnos...</p>}
+            {errorTurnos && <p className="text-red-500">Error al cargar turnos: {errorTurnos}</p>}
+            {!loadingTurnos && !errorTurnos && turnos.length === 0 && <p>No hay turnos programados para hoy.</p>}
+            {!loadingTurnos && !errorTurnos && turnos.length > 0 && (
+              <ul>
+                {turnos.map((turno) => (
+                  <li key={turno.id} className="py-2 border-b last:border-b-0">
+                    <strong className="block">Empleado: {turno.empleado ? turno.empleado.nombre : 'Sin asignar'}</strong>
+                    <span className="text-sm text-gray-600">Inicio: {new Date(turno.hora_inicio).toLocaleTimeString()}</span>
+                    <span className="text-sm text-gray-600 ml-2">Fin: {new Date(turno.hora_fin).toLocaleTimeString()}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </main>
       </div>
