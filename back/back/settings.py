@@ -45,6 +45,8 @@ CORS_ALLOWED_ORIGINS = [
     'stafftrack.onrender.com',
 ]
 
+
+ALLOWED_HOSTS = ['stafftrack.onrender.com']
 CORS_ALLOW_CREDENTIALS = True
 
 SESSION_COOKIE_SAMESITE = 'Lax'
